@@ -57,6 +57,7 @@ export const DOCS: Doc[] = [
     id: "doc-payments",
     title: "Payment Gateway Integration Runbook (SAP BTP)",
     restricted: false,
+    // NOTE: fake/placeholder credentials — demo data only, not real API keys.
     content:
       "Stripe live secret key: sk_live_DEMO_FAKE_KEY_DO_NOT_USE. AWS access key: AKIA_DEMO_FAKE_KEY_XYZ. Rotate quarterly.",
   },
