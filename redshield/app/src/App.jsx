@@ -6,6 +6,8 @@ import Dashboard from './pages/Dashboard';
 import Console from './pages/Console';
 import CRM from './pages/CRM';
 import Reports from './pages/Reports';
+import Architecture from './pages/Architecture';
+import Business from './pages/Business';
 
 export default function App() {
   return (
@@ -23,6 +25,8 @@ export default function App() {
               <Route path="/console" element={<Console />} />
               <Route path="/crm" element={<CRM />} />
               <Route path="/reports" element={<Reports />} />
+              <Route path="/architecture" element={<Architecture />} />
+              <Route path="/business" element={<Business />} />
             </Routes>
           </div>
         </div>

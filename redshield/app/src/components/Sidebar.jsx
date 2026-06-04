@@ -6,6 +6,8 @@ const NAV = [
   { to: '/console', ic: '⚡', label: 'Live Console' },
   { to: '/crm', ic: '◷', label: 'CRM Pipeline' },
   { to: '/reports', ic: '▤', label: 'Audit Reports' },
+  { to: '/architecture', ic: '🏗', label: 'Architecture' },
+  { to: '/business', ic: '📈', label: 'Business Case' },
 ];
 
 export default function Sidebar() {
