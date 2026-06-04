@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base: #060d1a;
+  --color-surface: #0c1829;
+  --color-elevated: #112038;
+  --color-accent: #00e5c0;
+  --color-blue: #3d8ef8;
+  --color-purple: #8b5cf6;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-text: #f0f6ff;
+  --color-muted: #6b90b8;
+  --color-faint: #46618a;
+  --font-heading: "Sora", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-base text-text;
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  h1, h2, h3 { font-family: var(--font-heading); }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(12, 24, 41, 0.7);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1rem;
+  }
+  .box-glow { box-shadow: 0 0 22px rgba(0, 229, 192, 0.16); }
+  .text-glow { text-shadow: 0 0 12px rgba(0, 229, 192, 0.4); }
+  .mono { font-family: var(--font-mono); }
+}
+
+/* animated gradient mesh + noise (matches Hospital Prediction System) */
+.gradient-mesh {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(0,229,192,.10) 0%, transparent 50%),
+    radial-gradient(circle at 85% 25%, rgba(61,142,248,.10) 0%, transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(139,92,246,.10) 0%, transparent 50%);
+  filter: blur(60px); animation: mesh 16s infinite alternate ease-in-out;
+}
+.noise {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes mesh { 0%{transform:scale(1) translate(0,0)} 50%{transform:scale(1.06) translate(2%,-2%)} 100%{transform:scale(1) translate(-2%,2%)} }
+@keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+@keyframes spin { to { transform: rotate(360deg) } }
+@keyframes blink { 50% { opacity: 0 } }
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes shake { 0%,100%{transform:translateY(-3px)} 25%{transform:translateY(-3px) translateX(-4px)} 75%{transform:translateY(-3px) translateX(4px)} }
+@keyframes fadeup { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+.caret { display:inline-block; width:7px; height:14px; background:var(--color-accent); vertical-align:middle; animation: blink .9s steps(1) infinite; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--color-elevated); border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
