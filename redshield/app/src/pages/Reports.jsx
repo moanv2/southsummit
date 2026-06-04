@@ -1,5 +1,6 @@
 import { useStore } from '../store';
 import { NLAB } from '../lib/attacks';
+import { AlertTriangle, ShieldCheck, Check, Download } from '../components/Icons';
 
 const esc = (s) => (s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -33,7 +34,7 @@ export default function Reports() {
       <div className="flex justify-between items-center mb-4">
         <div className="text-[13px] text-muted">{audits.length} attack(s) recorded · {br} breaches</div>
         <div className="flex gap-2.5">
-          <button onClick={download} disabled={!audits.length} className="relative overflow-hidden px-[18px] py-2.5 rounded-[11px] font-semibold text-[13px] border border-accent/50 bg-accent/10 text-accent box-glow hover:bg-accent/20 transition disabled:opacity-40">⬇ Generate audit report</button>
+          <button onClick={download} disabled={!audits.length} className="relative inline-flex items-center gap-2 overflow-hidden px-[18px] py-2.5 rounded-[11px] font-semibold text-[13px] border border-accent/50 bg-accent/10 text-accent box-glow hover:bg-accent/20 transition disabled:opacity-40"><Download /> Generate audit report</button>
           {audits.length > 0 && <button onClick={() => confirm('Clear all recorded audits?') && clearAudits()} className="px-[18px] py-2.5 rounded-[11px] font-semibold text-[13px] border border-white/10 bg-surface hover:bg-elevated transition">Clear</button>}
         </div>
       </div>
@@ -41,7 +42,7 @@ export default function Reports() {
         <div className="flex flex-col gap-2.5">
           {audits.map((x) => (
             <div key={x.id} className="glass flex items-center gap-3.5 px-4 py-3.5">
-              <div className="w-[38px] h-[38px] rounded-[10px] bg-surface border border-white/[0.06] flex items-center justify-center text-[17px] text-accent">{x.verdict === 'breach' ? '⚠' : x.verdict === 'blocked' ? '🛡' : '✓'}</div>
+              <div className="w-[38px] h-[38px] rounded-[10px] bg-surface border border-white/[0.06] flex items-center justify-center text-[17px]" style={{ color: x.verdict === 'breach' ? 'var(--color-danger)' : 'var(--color-accent)' }}>{x.verdict === 'breach' ? <AlertTriangle /> : x.verdict === 'blocked' ? <ShieldCheck /> : <Check />}</div>
               <div>
                 <div className="text-[13.5px] font-bold">{x.attack}</div>
                 <div className="text-[11px] text-muted">{NLAB[x.chokepoint] || x.chokepoint} · {x.mode} · {x.hospitalName || 'Triage Copilot'} · {new Date(x.ts).toLocaleString()}</div>

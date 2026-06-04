@@ -1,13 +1,14 @@
 import { NavLink } from 'react-router-dom';
+import { Globe, Grid, Zap, Columns, FileText, Layers, TrendingUp } from './Icons';
 
 const NAV = [
-  { to: '/', ic: '🌐', label: 'Website', end: true },
-  { to: '/dashboard', ic: '▢', label: 'Dashboard' },
-  { to: '/console', ic: '⚡', label: 'Live Console' },
-  { to: '/crm', ic: '◷', label: 'CRM Pipeline' },
-  { to: '/reports', ic: '▤', label: 'Audit Reports' },
-  { to: '/architecture', ic: '🏗', label: 'Architecture' },
-  { to: '/business', ic: '📈', label: 'Business Case' },
+  { to: '/', Ic: Globe, label: 'Website', end: true },
+  { to: '/dashboard', Ic: Grid, label: 'Dashboard' },
+  { to: '/console', Ic: Zap, label: 'Live Console' },
+  { to: '/crm', Ic: Columns, label: 'CRM Pipeline' },
+  { to: '/reports', Ic: FileText, label: 'Audit Reports' },
+  { to: '/architecture', Ic: Layers, label: 'Architecture' },
+  { to: '/business', Ic: TrendingUp, label: 'Business Case' },
 ];
 
 export default function Sidebar() {
@@ -37,7 +38,7 @@ export default function Sidebar() {
               }`
             }
           >
-            <span className="w-[18px] text-center text-[15px]">{n.ic}</span>
+            <span className="flex items-center justify-center text-[18px]"><n.Ic /></span>
             {n.label}
           </NavLink>
         ))}
