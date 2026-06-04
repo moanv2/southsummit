@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RedShield Clinical — Founder Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#000066;
+    --navy-soft:#1a1a85;
+    --ink:#1c1c28;
+    --muted:#5a5a72;
+    --line:#e3e3ef;
+    --bg-soft:#f5f6fb;
+    --accent:#0a8a5f;
+    --danger:#c0392b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Montserrat',-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--ink);
+    background:#dfe1ee;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    padding:28px 16px;
+  }
+  .page{
+    width:210mm;
+    max-width:100%;
+    margin:0 auto;
+    background:#fff;
+    box-shadow:0 8px 40px rgba(0,0,40,.18);
+  }
+  /* ---------- COVER ---------- */
+  .cover{
+    background:var(--navy);
+    color:#fff;
+    padding:34px 40px 30px;
+    position:relative;
+    overflow:hidden;
+  }
+  .cover:after{
+    content:"";
+    position:absolute;top:0;right:-60px;height:100%;width:280px;
+    background:linear-gradient(120deg,transparent,rgba(255,255,255,.07));
+    transform:skewX(-18deg);
+  }
+  .brandrow{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .shield{
+    width:30px;height:34px;flex:0 0 auto;
+    background:#fff;
+    -webkit-mask:path('M15 0 L30 6 V18 C30 27 23 32 15 34 C7 32 0 27 0 18 V6 Z') ;
+    mask:path('M15 0 L30 6 V18 C30 27 23 32 15 34 C7 32 0 27 0 18 V6 Z');
+    background:linear-gradient(160deg,#fff,#b9c0ff);
+  }
+  .brandname{font-weight:800;font-size:30px;letter-spacing:.5px;}
+  .brandname span{font-weight:300;opacity:.85;}
+  .tagline{font-size:8.5px;font-weight:600;letter-spacing:3px;text-transform:uppercase;opacity:.75;margin-top:2px;}
+  .wedge-line{
+    font-size:15px;font-weight:400;line-height:1.5;
+    max-width:80%;margin-top:14px;color:#eef0ff;
+  }
+  .wedge-line b{font-weight:700;color:#fff;}
+  .cover-meta{
+    display:flex;gap:26px;margin-top:18px;font-size:10px;font-weight:500;
+    border-top:1px solid rgba(255,255,255,.18);padding-top:12px;letter-spacing:.4px;
+  }
+  .cover-meta span{opacity:.7;text-transform:uppercase;font-size:8px;display:block;letter-spacing:1.5px;margin-bottom:2px;}
+  /* ---------- BODY ---------- */
+  .body{padding:26px 40px 36px;}
+  .grid{display:grid;gap:18px;}
+  .two{grid-template-columns:1fr 1fr;}
+  .sec{margin-bottom:22px;}
+  h2{
+    font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+    color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px;
+  }
+  h2:before{content:"";width:18px;height:3px;background:var(--navy);border-radius:2px;}
+  .bullets{list-style:none;}
+  .bullets li{
+    position:relative;padding-left:18px;margin-bottom:8px;font-size:11.5px;color:var(--ink);line-height:1.5;
+  }
+  .bullets li:before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;background:var(--navy);border-radius:50%;}
+  .bullets li b{color:var(--danger);font-weight:700;}
+  /* user card */
+  .ucard{background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:16px 18px;}
+  .ucard .uname{font-size:16px;font-weight:700;color:var(--navy);}
+  .ucard .urole{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:12px;}
+  .upf{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .upf div{font-size:10.5px;}
+  .upf .lab{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;display:block;}
+  .promo{color:var(--accent);font-weight:600;}
+  .fire{color:var(--danger);font-weight:600;}
+  /* wedge card */
+  .wcard{background:var(--navy);color:#fff;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;}
+  .wcard p{font-size:11.5px;line-height:1.5;color:#eef0ff;}
+  .wprice{margin-top:12px;font-size:30px;font-weight:800;}
+  .wprice small{font-size:11px;font-weight:500;opacity:.8;}
+  /* demand */
+  .demand{background:#fff8ec;border:1px solid #f0d9a8;border-left:4px solid #d99a17;border-radius:8px;padding:14px 16px;font-size:11.5px;line-height:1.55;}
+  .demand b{color:#9a6b06;}
+  .demand .warn{display:inline-block;margin-top:8px;font-size:10px;color:#a85;font-weight:600;}
+  /* market cards */
+  .market{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .mcard{border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;background:#fff;}
+  .mcard.som{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .mcard .mlab{font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
+  .mcard.som .mlab{color:#b9c0ff;}
+  .mcard .mnum{font-size:24px;font-weight:800;color:var(--navy);margin:4px 0 2px;}
+  .mcard.som .mnum{color:#fff;}
+  .mcard .msub{font-size:8.5px;color:var(--muted);}
+  .mcard.som .msub{color:#cfd3ff;}
+  /* business model */
+  .bm{display:grid;grid-template-columns:1.1fr 1.4fr;gap:16px;align-items:start;}
+  .pricebox{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg-soft);}
+  .pricebox .pr{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px dashed var(--line);font-size:11px;}
+  .pricebox .pr:last-child{border-bottom:none;}
+  .pricebox .pr b{font-size:15px;color:var(--navy);font-weight:800;}
+  .pricebox .pr span{color:var(--muted);}
+  .miles{display:flex;gap:10px;}
+  .mile{flex:1;border:1px solid var(--line);border-radius:10px;padding:12px 10px;text-align:center;position:relative;}
+  .mile .mo{font-size:8px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;}
+  .mile .mrr{font-size:20px;font-weight:800;color:var(--navy);margin:3px 0;}
+  .mile .mc{font-size:8.5px;color:var(--muted);line-height:1.3;}
+  .mile.last{background:var(--navy);border-color:var(--navy);}
+  .mile.last .mo{color:#b9c0ff;}.mile.last .mrr{color:#fff;}.mile.last .mc{color:#cfd3ff;}
+  .arrow{align-self:center;color:var(--line);font-size:16px;font-weight:800;}
+  /* competitor table */
+  table{width:100%;border-collapse:collapse;font-size:10.5px;}
+  th{background:var(--navy);color:#fff;text-align:left;padding:8px 10px;font-size:8.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+  td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:nth-child(even) td{background:var(--bg-soft);}
+  td b{color:var(--navy);}
+  .gaprow td{background:#eafaf2 !important;border-top:2px solid var(--accent);}
+  .gaprow td b{color:var(--accent);}
+  /* experiment */
+  .exp{background:var(--navy);color:#fff;border-radius:12px;padding:18px 22px;display:flex;gap:18px;align-items:center;}
+  .exp .big{font-size:42px;font-weight:800;line-height:.9;color:#fff;flex:0 0 auto;}
+  .exp .big small{display:block;font-size:9px;font-weight:600;letter-spacing:2px;opacity:.7;margin-top:4px;}
+  .exp .etxt{font-size:11.5px;line-height:1.55;color:#eef0ff;}
+  .exp .etxt b{color:#fff;}
+  .exp .verify{display:inline-block;margin-top:7px;font-size:9.5px;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:20px;font-weight:600;letter-spacing:.3px;}
+  /* footer */
+  .foot{padding:12px 40px;border-top:1px solid var(--line);font-size:8.5px;color:var(--muted);display:flex;justify-content:space-between;}
+  @media print{
+    body{background:#fff;padding:0;}
+    .page{box-shadow:none;width:100%;}
+    @page{size:A4;margin:0;}
+  }
+  @media(max-width:760px){
+    .page{width:100%;}
+    .two,.bm{grid-template-columns:1fr;}
+    .market{grid-template-columns:1fr;}
+    .miles{flex-direction:column;}
+    .arrow{transform:rotate(90deg);}
+    .wedge-line{max-width:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- COVER -->
+  <div class="cover">
+    <div class="brandrow">
+      <div class="shield"></div>
+      <div>
+        <div class="brandname">RedShield <span>Clinical</span></div>
+        <div class="tagline">Security layer for hospital AI agents</div>
+      </div>
+    </div>
+    <div class="wedge-line">
+      A one-time <b>adversarial audit of a hospital's live AI agent</b> — proof of exactly how it can be tricked into leaking patient data — delivered as <b>signed evidence for the DPO's mandatory DPIA</b>.
+    </div>
+    <div class="cover-meta">
+      <div><span>Project</span>RedShield Clinical</div>
+      <div><span>Stage</span>Pre-revenue · validating</div>
+      <div><span>Date</span>4 June 2026</div>
+      <div><span>Beachhead</span>Spain · private hospital groups</div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- PROBLEM -->
+    <div class="sec">
+      <h2>The Problem · Status Quo</h2>
+      <ul class="bullets">
+        <li>Hospitals "handle" AI-agent risk by getting the AI vendor to sign a <b>BAA/DPA</b> and assuming the contract transfers liability — nobody tests whether the controls actually hold.</li>
+        <li>A single pre-launch review, then nothing. The DPO documents a <b>DPIA on paper</b> but never <b>adversarially tests</b> the agent against prompt injection or data exfiltration.</li>
+        <li>The regulator confirms the gap: the #1 healthcare fine cause in 2025 was <b>"inadequate technical measures,"</b> and a named failure was <b>software letting staff access more patient data than necessary.</b></li>
+      </ul>
+    </div>
+
+    <!-- USER + WEDGE -->
+    <div class="grid two sec">
+      <div>
+        <h2>The User</h2>
+        <div class="ucard">
+          <div class="uname">The DPO / Chief Privacy Officer</div>
+          <div class="urole">~600-bed hospital · private group (Quirónsalud-type) · DPO legally mandatory under LOPDGDD</div>
+          <div class="upf">
+            <div><span class="lab">Promoted for</span><span class="promo">Standing up visible AI governance the board can see.</span></div>
+            <div><span class="lab">Fired for</span><span class="fire">A patient-data leak with no mechanism to detect or prevent it.</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h2>The Wedge · Pays This Week</h2>
+        <div class="wcard">
+          <p>One-time adversarial audit of their live AI agent. <b>No procurement, no integration, bookable on a single call.</b> Output: a dated, signed PDF that is evidence for the mandatory DPIA.</p>
+          <div class="wprice">€12,000 <small>/ one-off audit</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMAND -->
+    <div class="sec">
+      <h2>Demand Evidence · Strongest Proof</h2>
+      <div class="demand">
+        A hospital <b>director in Yanji</b> (family connection) has stated active intent to <b>improve their cybersecurity metrics</b> — signalling budget and an open door — plus a warm internal door via <b>Judith, a nurse manager</b>, to reach the actual buyer. Regulatory pressure is real and rising: the <b>AEPD issued €40M in fines in 2025</b>, the most aggressive DPA in Europe.
+        <span class="warn">⚠ Honest grade: this is warm intent, not payment. No one has paid or begged yet — converting it to a paid audit is this week's job.</span>
+      </div>
+    </div>
+
+    <!-- MARKET -->
+    <div class="sec">
+      <h2>Market · Spain (conservative, bottom-up)</h2>
+      <div class="market">
+        <div class="mcard">
+          <div class="mlab">TAM</div>
+          <div class="mnum">€18.8M<small style="font-size:11px;">/yr</small></div>
+          <div class="msub">All 751 Spanish hospitals × €25k/yr at maturity</div>
+        </div>
+        <div class="mcard">
+          <div class="mlab">SAM</div>
+          <div class="mnum">€5.3M<small style="font-size:11px;">/yr</small></div>
+          <div class="msub">~210 hospitals ≥200 beds × €25k/yr</div>
+        </div>
+        <div class="mcard som">
+          <div class="mlab">SOM · Year 1</div>
+          <div class="mnum">€120k</div>
+          <div class="msub">~6 audits + ~4 monitoring conversions</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUSINESS MODEL -->
+    <div class="sec">
+      <h2>Business Model</h2>
+      <div class="bm">
+        <div class="pricebox">
+          <div class="pr"><span>One-off audit (wedge)</span><b>€12k</b></div>
+          <div class="pr"><span>Continuous monitoring / facility</span><b>€2.5k<small style="font-size:9px;font-weight:500;">/mo</small></b></div>
+          <div class="pr"><span>Monthly burn (2-person)</span><b>€13.5k<small style="font-size:9px;font-weight:500;">/mo</small></b></div>
+          <div class="pr"><span>Break-even</span><b>Mo 18–24</b></div>
+        </div>
+        <div>
+          <div class="miles">
+            <div class="mile">
+              <div class="mo">Month 3</div>
+              <div class="mrr">€0</div>
+              <div class="mc">First audit lands<br>(€12k one-off)</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="mile">
+              <div class="mo">Month 6</div>
+              <div class="mrr">€2.5k</div>
+              <div class="mc">First monitoring<br>conversion · MRR begins</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="mile last">
+              <div class="mo">Month 12</div>
+              <div class="mrr">€10k</div>
+              <div class="mc">4 recurring custs<br>~€117k year-1 rev</div>
+            </div>
+          </div>
+          <div style="font-size:8.5px;color:var(--muted);margin-top:8px;line-height:1.4;">Single metric that decides business vs. freelance gig: <b style="color:var(--navy)">audit → monitoring conversion rate</b> — currently unproven.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPETITORS -->
+    <div class="sec">
+      <h2>Competitor Gap</h2>
+      <table>
+        <thead>
+          <tr><th style="width:22%">Competitor</th><th style="width:20%">Price</th><th>Concrete weakness</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>Lakera</b> (→ Cisco)</td><td>$99/mo → enterprise custom</td><td>Buried in the Cisco AI Defense bundle; sold top-down to enterprise CISOs. No LOPDGDD / PHI / Spanish-language packaging.</td></tr>
+          <tr><td><b>Giskard</b> (FR)</td><td>Free OSS → custom</td><td>A developer/ML tool — output is an engineer's eval report, not a DPIA document a DPO hands the AEPD.</td></tr>
+          <tr><td><b>Schellman / HackerOne</b></td><td>From $16k / engagement</td><td>Generic AI red-team service delivered in English from the US — no healthcare-PHI focus, no Art. 32 / DPIA framing.</td></tr>
+          <tr class="gaprow"><td><b>▶ The gap we own</b></td><td><b>€12k one-off</b></td><td><b>PHI-aware audit · in Spanish · as GDPR Art. 32 / mandatory-DPIA evidence · buyable as a one-off with no platform, no in-house ML team.</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- EXPERIMENT -->
+    <div class="sec">
+      <h2>This Week's Experiment · Before Friday</h2>
+      <div class="exp">
+        <div class="big">1<small>CALL</small></div>
+        <div class="etxt">
+          Call the <b>Yanji director</b> and ask two qualifying questions: (1) <b>Does your hospital run an AI agent that touches patient data?</b> (2) <b>If I showed you that agent leaking a real patient record, would you pay €12k for a signed audit?</b>
+          <span class="verify">✓ Verifiable: a written yes/no on both + her reaction to the €12k price, captured the same day.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <span>RedShield Clinical · Founder Brief · Confidential</span>
+    <span>Generated 4 June 2026 · Pre-revenue validation stage</span>
+  </div>
+
+</div>
+</body>
+</html>
