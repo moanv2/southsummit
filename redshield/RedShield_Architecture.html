@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RedShield Clinical — Architecture & AWS Deployment</title>
+<style>
+  :root{
+    --bg:#070b14; --panel:rgba(20,28,46,.72); --panel2:rgba(10,17,32,.6);
+    --border:rgba(90,110,150,.18); --border-bright:rgba(120,150,200,.35);
+    --text:#eaf0fa; --muted:#8b98b4; --faint:#5d6a86;
+    --red:#ff4d5e; --red-dim:rgba(255,77,94,.12);
+    --green:#23e3a3; --green-dim:rgba(35,227,163,.10);
+    --teal:#3fd9d0; --blue:#5b9dff; --amber:#ffc24b; --purple:#a78bfa;
+    --aws:#ff9900; --aws-dim:rgba(255,153,0,.10);
+    --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(1200px 600px at 80% -10%,rgba(63,217,208,.07),transparent 60%),
+               radial-gradient(900px 500px at 0% 100%,rgba(91,157,255,.07),transparent 55%),var(--bg);overflow-x:hidden}
+  body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+    background-size:46px 46px;mask-image:radial-gradient(circle at 50% 18%,#000 30%,transparent 80%)}
+  .app{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:28px 24px 72px}
+
+  /* TOP BAR */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:26px}
+  .brand{display:flex;align-items:center;gap:13px}
+  .logo{width:40px;height:46px;filter:drop-shadow(0 0 10px rgba(63,217,208,.45))}
+  .brand h1{font-size:22px;font-weight:800;letter-spacing:-.3px;line-height:1}
+  .brand h1 span{color:var(--teal)}
+  .brand .sub{font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--faint);margin-top:5px;font-weight:600}
+  .pagetag{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:var(--aws);border:1px solid rgba(255,153,0,.35);background:var(--aws-dim);padding:8px 14px;border-radius:999px}
+
+  /* SECTION SCAFFOLD */
+  section{margin-bottom:34px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .sec-h .num{font-family:var(--mono);font-size:12px;color:var(--teal);font-weight:600}
+  .sec-h h2{font-size:18px;font-weight:800;letter-spacing:-.2px}
+  .sec-h .desc{font-size:12.5px;color:var(--muted);margin-left:auto;max-width:520px;line-height:1.5}
+  .panel{background:var(--panel);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:16px;padding:22px}
+
+  /* FLOW (request path) */
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;justify-content:center}
+  .fnode{flex:1;min-width:150px;border:1.5px solid var(--border-bright);background:rgba(13,20,34,.8);border-radius:14px;padding:16px 14px;text-align:center;display:flex;flex-direction:column;gap:7px;align-items:center}
+  .fnode .ic{font-size:26px;line-height:1}
+  .fnode .t{font-size:13.5px;font-weight:700}
+  .fnode .d{font-size:11px;color:var(--muted);line-height:1.45}
+  .fnode.shield{border-color:var(--teal);background:rgba(63,217,208,.07);box-shadow:0 0 26px rgba(63,217,208,.12)}
+  .fnode.shield .t{color:var(--teal)}
+  .fnode.agent{border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.07)}
+  .fnode.agent .t{color:var(--purple)}
+  .farr{flex:0 0 44px;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:20px}
+  .farr span{display:inline-block}
+  @media(max-width:780px){.flow{flex-direction:column}.farr{flex:0 0 30px;transform:rotate(90deg)}}
+
+  /* 4 CHOKEPOINTS strip */
+  .choke{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  @media(max-width:780px){.choke{grid-template-columns:1fr 1fr}}
+  .cp{border:1px solid var(--border);border-radius:12px;padding:13px;background:var(--panel2)}
+  .cp .cp-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .cp .cp-n{font-family:var(--mono);font-size:10px;color:var(--blue);font-weight:600}
+  .cp .cp-ic{font-size:18px}
+  .cp .cp-t{font-size:13px;font-weight:700}
+  .cp .cp-svc{font-size:10.5px;color:var(--aws);font-weight:600;margin-top:2px}
+  .cp .cp-d{font-size:11px;color:var(--muted);line-height:1.45;margin-top:6px}
+
+  /* AWS ARCHITECTURE diagram */
+  .region{border:1.5px dashed rgba(255,153,0,.4);border-radius:18px;padding:18px 18px 22px;position:relative;background:rgba(255,153,0,.025)}
+  .region-label{position:absolute;top:-11px;left:20px;background:var(--bg);padding:0 10px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--aws);display:flex;align-items:center;gap:7px}
+  .region-label .dot{width:8px;height:8px;border-radius:50%;background:var(--aws);box-shadow:0 0 10px var(--aws)}
+  .tier{margin-top:16px}
+  .tier:first-child{margin-top:6px}
+  .tier-lab{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:9px;padding-left:2px}
+  .svc-row{display:flex;gap:12px;flex-wrap:wrap}
+  .svc{flex:1;min-width:170px;border:1px solid var(--border);border-radius:12px;padding:13px 14px;background:rgba(13,20,34,.7);display:flex;flex-direction:column;gap:5px}
+  .svc.aws{border-color:rgba(255,153,0,.3)}
+  .svc .svc-h{display:flex;align-items:center;gap:8px}
+  .svc .svc-ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--aws-dim);border:1px solid rgba(255,153,0,.3);flex:0 0 auto}
+  .svc.core .svc-ic{background:rgba(63,217,208,.1);border-color:rgba(63,217,208,.35)}
+  .svc .svc-name{font-size:13px;font-weight:700;line-height:1.15}
+  .svc .svc-sub{font-size:10px;color:var(--aws);font-weight:600;letter-spacing:.3px}
+  .svc.core .svc-sub{color:var(--teal)}
+  .svc .svc-d{font-size:11px;color:var(--muted);line-height:1.45;margin-top:2px}
+  .down{display:flex;justify-content:center;color:var(--faint);font-size:16px;margin:8px 0}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;font-size:12.5px;overflow:hidden;border-radius:12px}
+  thead th{background:rgba(91,157,255,.12);color:var(--text);text-align:left;padding:11px 13px;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;border-bottom:1px solid var(--border)}
+  tbody td{padding:11px 13px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5;color:var(--muted)}
+  tbody td:first-child{color:var(--text);font-weight:600}
+  tbody tr:last-child td{border-bottom:0}
+  .aws-tag{color:var(--aws);font-weight:600}
+  .ok{color:var(--green);font-weight:700}
+  .wiz{color:var(--amber);font-weight:700}
+
+  /* GDPR cards */
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:780px){.cards{grid-template-columns:1fr}}
+  .card{border:1px solid var(--border);border-radius:14px;padding:16px 18px;background:var(--panel2)}
+  .card.flag{border-color:rgba(35,227,163,.3);background:var(--green-dim)}
+  .card .ct{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;margin-bottom:8px}
+  .card .ct .em{font-size:18px}
+  .card.flag .ct{color:var(--green)}
+  .card .cd{font-size:12px;color:var(--muted);line-height:1.55}
+  .card .cd b{color:var(--text)}
+
+  /* pitch line */
+  .pitch{border:1px solid var(--border-bright);border-left:3px solid var(--teal);border-radius:12px;background:rgba(63,217,208,.05);padding:16px 18px;font-size:13.5px;line-height:1.6;color:#dce4f1}
+  .pitch b{color:var(--teal)}
+  .foot{margin-top:30px;text-align:center;font-size:11px;color:var(--faint);line-height:1.6}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:14px;justify-content:center}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 40 46" fill="none"><path d="M20 1 L38 8 V22 C38 33 30 41 20 45 C10 41 2 33 2 22 V8 Z" fill="rgba(63,217,208,.10)" stroke="#3fd9d0" stroke-width="1.6"/><path d="M20 14 V30 M12 22 H28" stroke="#3fd9d0" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+      <div><h1>Red<span>Shield</span> Clinical</h1><div class="sub">PHI guardrail for hospital AI agents</div></div>
+    </div>
+    <div class="pagetag">Architecture &amp; AWS deployment</div>
+  </div>
+
+  <!-- 1 · REQUEST FLOW -->
+  <section>
+    <div class="sec-h"><span class="num">01</span><h2>How it sits in the request path</h2>
+      <div class="desc">RedShield is not an agent — it is an <b style="color:var(--teal)">AI gateway</b> that sits inline between the hospital's clinical agent and its data, inspecting every hop at four chokepoints.</div></div>
+    <div class="panel">
+      <div class="flow">
+        <div class="fnode"><div class="ic">🧑‍⚕️</div><div class="t">Clinician / Patient</div><div class="d">asks the copilot a question</div></div>
+        <div class="farr"><span>→</span></div>
+        <div class="fnode agent"><div class="ic">🤖</div><div class="t">Clinical AI Agent</div><div class="d">Triage Copilot on the EHR</div></div>
+        <div class="farr"><span>→</span></div>
+        <div class="fnode shield"><div class="ic">🛡️</div><div class="t">RedShield Gateway</div><div class="d">4 chokepoints inspect every hop</div></div>
+        <div class="farr"><span>→</span></div>
+        <div class="fnode"><div class="ic">🗄️</div><div class="t">EHR · Tools · Output</div><div class="d">patient data &amp; actions</div></div>
+      </div>
+
+      <div class="choke">
+        <div class="cp"><div class="cp-top"><span class="cp-ic">⌨️</span><div><div class="cp-n">01 · INPUT</div><div class="cp-t">Prompt Guard</div></div></div><div class="cp-svc">Lambda + Bedrock</div><div class="cp-d">Blocks prompt injection &amp; jailbreaks before the model runs.</div></div>
+        <div class="cp"><div class="cp-top"><span class="cp-ic">🗄️</span><div><div class="cp-n">02 · RETRIEVAL</div><div class="cp-t">PHI / Access Guard</div></div></div><div class="cp-svc">Comprehend Medical</div><div class="cp-d">Stops over-broad EHR reads outside the care relationship.</div></div>
+        <div class="cp"><div class="cp-top"><span class="cp-ic">⚙️</span><div><div class="cp-n">03 · TOOL</div><div class="cp-t">Action Guard</div></div></div><div class="cp-svc">MCP allow-list</div><div class="cp-d">Refuses destructive / unauthorized tool calls.</div></div>
+        <div class="cp"><div class="cp-top"><span class="cp-ic">📤</span><div><div class="cp-n">04 · OUTPUT</div><div class="cp-t">DLP Masking</div></div></div><div class="cp-svc">Comprehend Medical + Textract</div><div class="cp-d">Redacts PHI, IDs &amp; secrets — incl. text inside images.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · AWS REFERENCE ARCHITECTURE -->
+  <section>
+    <div class="sec-h"><span class="num">02</span><h2>AWS reference architecture</h2>
+      <div class="desc">Everything runs inside the <b style="color:var(--aws)">AWS Europe (Spain) region</b> — patient data never leaves Spanish soil. Built on HIPAA-eligible managed services, so RedShield orchestrates compliance instead of rebuilding it.</div></div>
+    <div class="panel">
+      <div class="region">
+        <div class="region-label"><span class="dot"></span>AWS EUROPE (SPAIN) · eu-south-2 · Aragón</div>
+
+        <div class="tier">
+          <div class="tier-lab">Ingress · the gateway</div>
+          <div class="svc-row">
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">🚪</div><div><div class="svc-name">API Gateway</div><div class="svc-sub">AWS · ingress</div></div></div><div class="svc-d">Receives every agent request; the inline proxy seam.</div></div>
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">λ</div><div><div class="svc-name">Lambda</div><div class="svc-sub">AWS · serverless</div></div></div><div class="svc-d">Runs the chokepoint logic; scales to zero between audits.</div></div>
+          </div>
+        </div>
+
+        <div class="down">↓</div>
+
+        <div class="tier">
+          <div class="tier-lab">Detection engine · hybrid NLP</div>
+          <div class="svc-row">
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">🧬</div><div><div class="svc-name">Comprehend Medical</div><div class="svc-sub">AWS · PHI NER · HIPAA-eligible</div></div></div><div class="svc-d">Purpose-built medical NLP: detects names, DNI, diagnoses, meds.</div></div>
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">📄</div><div><div class="svc-name">Textract</div><div class="svc-sub">AWS · OCR · HIPAA-eligible</div></div></div><div class="svc-d">Reads PHI out of scanned referrals, lab reports &amp; faxes.</div></div>
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">🧠</div><div><div class="svc-name">Claude on Bedrock</div><div class="svc-sub">AWS · LLM-as-judge · in-region</div></div></div><div class="svc-d">Semantic judge for novel attacks — no data leaves AWS/EU.</div></div>
+            <div class="svc core"><div class="svc-h"><div class="svc-ic">⚡</div><div><div class="svc-name">Regex / NER</div><div class="svc-sub">RedShield · deterministic</div></div></div><div class="svc-d">Fast, auditable pattern layer; runs before the LLM judge.</div></div>
+          </div>
+        </div>
+
+        <div class="down">↓</div>
+
+        <div class="tier">
+          <div class="tier-lab">Evidence · the audit artifact</div>
+          <div class="svc-row">
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">🔒</div><div><div class="svc-name">S3 + Object Lock</div><div class="svc-sub">AWS · write-once (WORM)</div></div></div><div class="svc-d">Tamper-proof signed DPIA report — cannot be altered after signing.</div></div>
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">🔑</div><div><div class="svc-name">KMS</div><div class="svc-sub">AWS · encryption</div></div></div><div class="svc-d">Customer-managed keys; encrypt at rest, full key control.</div></div>
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">📜</div><div><div class="svc-name">CloudTrail</div><div class="svc-sub">AWS · audit log</div></div></div><div class="svc-d">Logs every access to the evidence — chain of custody.</div></div>
+          </div>
+        </div>
+
+        <div class="down">↓</div>
+
+        <div class="tier">
+          <div class="tier-lab">Continuous monitoring · the €2,500/mo expansion</div>
+          <div class="svc-row">
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">📊</div><div><div class="svc-name">CloudWatch</div><div class="svc-sub">AWS · metrics</div></div></div><div class="svc-d">Live risk &amp; breach dashboards.</div></div>
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">🔔</div><div><div class="svc-name">EventBridge + SNS</div><div class="svc-sub">AWS · alerting</div></div></div><div class="svc-d">Real-time alerts to the DPO on any leak attempt.</div></div>
+            <div class="svc aws"><div class="svc-h"><div class="svc-ic">🔍</div><div><div class="svc-name">OpenSearch</div><div class="svc-sub">AWS · tracing</div></div></div><div class="svc-d">Searchable trail of every agent interaction.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><i style="background:rgba(255,153,0,.5)"></i> AWS managed service (HIPAA-eligible where noted)</span>
+        <span><i style="background:rgba(63,217,208,.5)"></i> RedShield logic</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · CHOKEPOINT → SERVICE MAPPING -->
+  <section>
+    <div class="sec-h"><span class="num">03</span><h2>Chokepoint → AWS service mapping</h2>
+      <div class="desc">Each of the four chokepoints in the live demo maps 1:1 to a named AWS service. The path to production is wiring, not invention.</div></div>
+    <div class="panel" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>Chokepoint</th><th>RedShield capability</th><th>AWS service</th><th>Why it's the right call</th></tr></thead>
+        <tbody>
+          <tr><td>01 · Input</td><td>Prompt Guard — injection / jailbreak detection</td><td class="aws-tag">Lambda + Bedrock</td><td>Deterministic regex first, Claude judge for novel attacks — before the model runs.</td></tr>
+          <tr><td>02 · Retrieval</td><td>PHI &amp; over-broad-access detection</td><td class="aws-tag">Comprehend Medical</td><td>HIPAA-eligible medical NLP whose job <i>is</i> <span class="aws-tag">DetectPHI</span>. Maps to the AEPD's #1 fine cause.</td></tr>
+          <tr><td>03 · Tool / Action</td><td>Action allow-listing, blocks destructive calls</td><td class="aws-tag">MCP gateway on Lambda</td><td>Controls agent → tool/data access; refuses bulk exports &amp; deletes.</td></tr>
+          <tr><td>04 · Output</td><td>DLP masking incl. multimodal</td><td class="aws-tag">Comprehend Medical + Textract</td><td>Redacts PHI &amp; secrets in text <i>and</i> in scanned images competitors miss.</td></tr>
+          <tr><td>— · Evidence</td><td>Signed DPIA audit report</td><td class="aws-tag">S3 Object Lock + KMS</td><td>Write-once, tamper-proof artifact for the regulator.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4 · GDPR trump cards -->
+  <section>
+    <div class="sec-h"><span class="num">04</span><h2>Why AWS wins the GDPR conversation</h2>
+      <div class="desc">Two facts answer the DPO's biggest objections before they're raised.</div></div>
+    <div class="cards">
+      <div class="card flag"><div class="ct"><span class="em">🇪🇸</span> Data stays in Spain</div><div class="cd">The <b>AWS Europe (Spain) region (eu-south-2, Aragón)</b> keeps patient data on Spanish soil. For an AEPD-facing DPO, <b>"data never leaves the country"</b> is a tender-winner and an objection-ender.</div></div>
+      <div class="card flag"><div class="ct"><span class="em">📋</span> Inherited compliance</div><div class="cd">AWS is a <b>GDPR data processor with a signed DPA</b>; Comprehend Medical &amp; Textract are <b>HIPAA-eligible</b>. RedShield inherits a mountain of compliance — and cites it directly in the DPIA.</div></div>
+      <div class="card flag"><div class="ct"><span class="em">🔒</span> Tamper-proof evidence</div><div class="cd"><b>S3 Object Lock (WORM)</b> means the signed audit report <b>cannot be altered after signing</b>. CloudTrail records every access — bulletproof chain of custody if the AEPD ever asks.</div></div>
+      <div class="card flag"><div class="ct"><span class="em">🧠</span> No data egress to the model</div><div class="cd">Running <b>Claude on Bedrock</b> keeps the LLM inside AWS/EU. Kills the <b>"you're shipping PHI to a US API endpoint"</b> objection cold.</div></div>
+    </div>
+  </section>
+
+  <!-- 5 · Real vs Wizard-of-Oz -->
+  <section>
+    <div class="sec-h"><span class="num">05</span><h2>What's real today vs. the production claim</h2>
+      <div class="desc">Honest framing: the frontend and the problem are real. The backend is a thin Wizard-of-Oz — but every faked call maps to a named AWS service.</div></div>
+    <div class="panel" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>Layer</th><th>Hackathon reality</th><th>Production claim</th></tr></thead>
+        <tbody>
+          <tr><td>Frontend &amp; problem framing</td><td><span class="ok">Real</span> — the live HTML demo</td><td>Same</td></tr>
+          <tr><td>4-chokepoint detection logic</td><td><span class="ok">Real-ish</span> — regex + Claude judge in-browser</td><td>Lambda + Comprehend Medical + Bedrock</td></tr>
+          <tr><td>PHI / OCR services</td><td><span class="wiz">Wizard-of-Oz</span> — pre-baked responses</td><td>Comprehend Medical + Textract</td></tr>
+          <tr><td>Audit report</td><td><span class="ok">Real</span> — generated client-side</td><td>S3 Object Lock signed artifact</td></tr>
+          <tr><td>"Runs in AWS Spain region"</td><td><span class="wiz">Slide only</span></td><td>Actual deployment in eu-south-2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6 · Pitch line -->
+  <section>
+    <div class="sec-h"><span class="num">06</span><h2>The one-line architecture pitch</h2></div>
+    <div class="pitch">
+      "RedShield is a serverless AWS gateway — <b>API Gateway + Lambda</b> — that runs <b>Amazon Comprehend Medical</b> for PHI detection, <b>Textract</b> for scanned-document OCR, and <b>Claude on Bedrock</b> as a semantic judge, all inside the <b>AWS Europe (Spain) region</b> so patient data never leaves the country — writing tamper-proof signed audit evidence to <b>S3 Object Lock</b> for the DPO's mandatory DPIA."
+    </div>
+  </section>
+
+  <div class="foot">RedShield Clinical · architecture &amp; AWS deployment view · 100% synthetic data · service names illustrate the production design, not a live deployment.</div>
+</div>
+</body>
+</html>
